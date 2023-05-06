@@ -10,11 +10,17 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button btn;
     private ImageView imageView;
     private TextView titleTv;
+
+    private final String API_KEY =  "wgqap22aPTYiF7UzBddMwaolVUcB5StMOwzPTfZD";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,17 +35,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void get_data(){
-        ApiService service = new ApiService(App.getClient());
-        service.getTodayData(new ApiService.ApiServiceListener() {
+        ApiService apiService = App.getApi();
+        apiService.getData(API_KEY).enqueue(new Callback<ApodResponse>() {
             @Override
-            public void onDataUpdate(ApodResponse apodResponse) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        titleTv.setText(apodResponse.title);
-                        Picasso.get().load(apodResponse.url).into(imageView);
-                    }
-                });
+            public void onResponse(Call<ApodResponse> call, Response<ApodResponse> response) {
+                ApodResponse apodResponse = response.body();
+                titleTv.setText(apodResponse.title);
+                Picasso.get().load(apodResponse.url).into(imageView);
+            }
+
+            @Override
+            public void onFailure(Call<ApodResponse> call, Throwable t) {
+
             }
         });
     }
